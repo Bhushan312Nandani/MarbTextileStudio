@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
+const productController = require('../../controllers/public/product.controller');
 
-// GET all products (Intern: Member 2 - Implement Logic)
-router.get('/', (req, res) => {
-    res.status(200).json({ message: "Product List - To be implemented" });
-});
+// GET all products (Intern: Member 2 - Implement Logic in product.service.js)
+router.get('/', productController.listProducts);
 
-// GET single product (Intern: Member 2 - Implement Logic)
-router.get('/:id', (req, res) => {
-    res.status(200).json({ message: `Product details for ID: ${req.params.id} - To be implemented` });
-});
+// GET search (Intern: Member 2 - Implement Logic in product.service.js)
+router.get('/search', productController.searchProducts);
+
+// GET single product (Intern: Member 2 - Implement Logic in product.service.js)
+router.get('/:id', productController.getProduct);
 
 module.exports = router;

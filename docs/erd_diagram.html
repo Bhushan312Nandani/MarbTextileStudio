@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced E-Commerce ERD & Database Flow</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .flow-section {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        .flow-card {
+            flex: 1;
+            min-width: 250px;
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #3498db;
+        }
+        .flow-card h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .mermaid {
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            overflow-x: auto;
+        }
+    </style>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <h1>Advanced E-Commerce Architecture (PostgreSQL)</h1>
+    
+    <h2>1. Entity Relationship Diagram (ERD)</h2>
+    <p>Below is the complete relational structure of the database, highlighting the Multi-Vendor and Apparel-Variant capabilities.</p>
+    <div class="mermaid">
+        erDiagram
+            %% USERS & SECURITY
+            USERS ||--o{ USER_SESSIONS : "has"
+            USERS ||--o{ ADDRESSES : "saves"
+            USERS ||--o| SELLER_PROFILES : "can have (1:1)"
+            USERS ||--o{ NOTIFICATIONS : "receives"
+            USERS ||--o{ AUDIT_LOGS : "performs"
+
+            %% CATALOG
+            BRANDS ||--o{ PRODUCTS : "manufactures"
+            CATEGORIES ||--o{ PRODUCTS : "categorizes"
+            USERS ||--o{ PRODUCTS : "sells"
+            
+            PRODUCTS ||--o{ PRODUCT_VARIANTS : "has sizes/colors"
+            PRODUCTS ||--o{ PRODUCT_IMAGES : "has gallery"
+            PRODUCTS ||--o{ REVIEWS : "receives"
+            
+            %% INVENTORY & ENGAGEMENT
+            PRODUCT_VARIANTS ||--o{ INVENTORY_LOGS : "tracked in"
+            USERS ||--o{ WISHLISTS : "creates"
+            WISHLISTS ||--o{ WISHLIST_ITEMS : "contains"
+            PRODUCTS ||--o{ WISHLIST_ITEMS : "added to"
+            USERS ||--o{ REVIEWS : "writes"
+
+            %% CART & ORDERS
+            USERS ||--o| CARTS : "owns (1:1)"
+            CARTS ||--o{ CART_ITEMS : "holds"
+            PRODUCT_VARIANTS ||--o{ CART_ITEMS : "added as"
+
+            USERS ||--o{ ORDERS : "places"
+            ADDRESSES ||--o{ ORDERS : "shipped to"
+            COUPONS ||--o{ ORDERS : "applied to"
+            
+            ORDERS ||--o{ ORDER_ITEMS : "contains"
+            PRODUCT_VARIANTS ||--o{ ORDER_ITEMS : "sold as"
+
+            %% FULFILLMENT
+            ORDERS ||--o| PAYMENTS : "paid via (1:1)"
+            ORDERS ||--o| SHIPMENTS : "delivered via (1:1)"
+            ORDER_ITEMS ||--o| RETURNS : "returned as (1:1)"
+
+            %% KEY DEFINITIONS
+            USERS {
+                uuid id PK
+                varchar email
+                varchar role
+            }
+            PRODUCTS {
+                uuid id PK
+                uuid category_id FK
+                uuid seller_id FK
+                varchar title
+            }
+            PRODUCT_VARIANTS {
+                uuid id PK
+                uuid product_id FK
+                varchar sku UK
+                varchar size
+                varchar color
+                int stock_quantity
+            }
+            ORDERS {
+                uuid id PK
+                uuid user_id FK
+                numeric grand_total
+                varchar status
+            }
+            ORDER_ITEMS {
+                uuid id PK
+                uuid order_id FK
+                uuid variant_id FK
+                int quantity
+            }
+    </div>
+
+    <h2 style="margin-top: 50px;">2. Flow of Understanding (How Data Moves)</h2>
+    <p>This illustrates the sequential lifecycle of a user interacting with the apparel marketplace.</p>
+    <div class="mermaid">
+        graph TD
+            A[User Auth<br/>USERS & USER_SESSIONS] --> B[Browse Catalog<br/>CATEGORIES, BRANDS & PRODUCTS]
+            B --> C[View Details & Variants<br/>PRODUCT_VARIANTS & IMAGES]
+            C -.->|Optional| W[Save for Later<br/>WISHLISTS]
+            C --> D[Add Variant to Cart<br/>CARTS & CART_ITEMS]
+            D --> E[Apply Discount & Address<br/>COUPONS & ADDRESSES]
+            E --> F[Checkout / Create Order<br/>ORDERS & ORDER_ITEMS]
+            F --> G[Payment Processing<br/>PAYMENTS]
+            G -->|Success| H[Deduct Stock<br/>INVENTORY_LOGS]
+            H --> I[Dispatch & Delivery<br/>SHIPMENTS]
+            I -.->|Post-Delivery| J[Leave Review or Return<br/>REVIEWS & RETURNS]
+    </div>
+
+    <div class="flow-section">
+        <div class="flow-card">
+            <h3>Step 1: Identity & Sellers</h3>
+            <p>Data starts at <strong>USERS</strong>. Roles define access (Customer, Seller, Admin). Sellers manage their store details via <strong>SELLER_PROFILES</strong>. <strong>USER_SESSIONS</strong> secures the JWT lifecycle.</p>
+        </div>
+        <div class="flow-card">
+            <h3>Step 2: Apparel Variations</h3>
+            <p><strong>PRODUCTS</strong> act as the parent container. The actual physical items exist in <strong>PRODUCT_VARIANTS</strong> (handling specific Sizes, Colors, and SKUs). <strong>PRODUCT_IMAGES</strong> supports multiple angles.</p>
+        </div>
+        <div class="flow-card">
+            <h3>Step 3: Cart & Engagement</h3>
+            <p>Users add specific <strong>PRODUCT_VARIANTS</strong> to <strong>CART_ITEMS</strong>. They can also save items to <strong>WISHLISTS</strong>. Stock changes are securely audited in <strong>INVENTORY_LOGS</strong>.</p>
+        </div>
+        <div class="flow-card">
+            <h3>Step 4: Full Order Lifecycle</h3>
+            <p>Checkout shifts data to <strong>ORDERS</strong> (applying <strong>COUPONS</strong>). <strong>PAYMENTS</strong> verifies funds, <strong>SHIPMENTS</strong> tracks courier details, and <strong>RETURNS</strong> handles post-sale refunds.</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -23,5 +23,8 @@ app.get("/", (req,res)=>{
 const mainRouter = require('./routes/index');
 app.use('/api/v1', mainRouter);
 
+// Central error handler - must stay LAST, after all routes are mounted
+const errorHandler = require('./middleware/error.middleware');
+app.use(errorHandler);
 
 module.exports = app;

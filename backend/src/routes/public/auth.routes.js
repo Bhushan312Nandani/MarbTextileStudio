@@ -1,14 +1,11 @@
 const express = require('express');
 const router = express.Router();
+const authController = require('../../controllers/public/auth.controller');
 
-// POST register user (Intern: Member 4 - Implement Logic)
-router.post('/register', (req, res) => {
-    res.status(200).json({ message: "User Registration - To be implemented" });
-});
+// POST register user (Intern: Member 4 - Implement Logic in auth.service.js)
+router.post('/register', authController.register);
 
-// POST login user (Intern: Member 4 - Implement Logic)
-router.post('/login', (req, res) => {
-    res.status(200).json({ message: "User Login - To be implemented" });
-});
+// POST login user (Intern: Member 4 - Implement Logic in auth.service.js)
+router.post('/login', authController.login);
 
 module.exports = router;

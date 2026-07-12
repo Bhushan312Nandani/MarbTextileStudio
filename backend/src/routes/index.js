@@ -5,11 +5,15 @@ const router = express.Router();
 const productRoutes = require('./public/product.routes');
 const categoryRoutes = require('./public/category.routes');
 const authRoutes = require('./public/auth.routes');
+const adminRoutes = require('./admin/index');
 
 // Connect the public routes
 router.use('/public/products', productRoutes);
 router.use('/public/categories', categoryRoutes);
 router.use('/public/auth', authRoutes);
+
+// Connect the admin routes (all protected by auth + role middleware)
+router.use('/admin', adminRoutes);
 
 // Export the main router
 module.exports = router;
