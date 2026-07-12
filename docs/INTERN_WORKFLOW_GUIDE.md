@@ -2,6 +2,9 @@
 
 Welcome to the Apparel E-Commerce project! This guide will tell you exactly what your role is, where you should write your code, and how to use GitHub properly.
 
+> **Need to set up the project on your computer first?**
+> Go back to the **[Main README](../README.md)** for step-by-step instructions on how to install and run the Frontend and Backend!
+
 ---
 
 ## 🛑 STRICT RULES FOR GITHUB
