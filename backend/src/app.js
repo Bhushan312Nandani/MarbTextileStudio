@@ -19,5 +19,9 @@ app.get("/", (req,res)=>{
     });
 });
 
+// Connect main router
+const mainRouter = require('./routes/index');
+app.use('/api/v1', mainRouter);
+
 
 module.exports = app;
