@@ -1,0 +1,26 @@
+# CODEOWNERS
+# Rules are evaluated from top to bottom. The last matching rule takes precedence.
+
+# Database Architecture ownership (Member 1)
+# Restrict schema modifications to prevent conflicts and ensure integrity.
+/backend/prisma/schema.prisma @member1
+/backend/prisma/migrations/ @member1
+
+# Public API ownership (Member 2)
+/backend/src/routes/public/ @member2
+/backend/src/controllers/public/ @member2
+/backend/src/services/public/ @member2
+
+# Admin API ownership (Member 3)
+/backend/src/routes/admin/ @member3
+/backend/src/controllers/admin/ @member3
+/backend/src/services/admin/ @member3
+
+# Security ownership (Member 4)
+/backend/src/middleware/ @member4
+/backend/src/auth/ @member4
+/backend/src/utils/security/ @member4
+
+# QA & Docs ownership (Member 5)
+/docs/ @member5
+/postman/ @member5

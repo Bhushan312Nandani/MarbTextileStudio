@@ -1,0 +1,42 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies (Backend)
+      run: npm ci
+      working-directory: ./backend
+
+    - name: Generate Prisma Client
+      run: npx prisma generate
+      working-directory: ./backend
+
+    # You can add more checks here like linting or running tests if available
+    # - name: Run Linter
+    #   run: npm run lint
+    #   working-directory: ./backend
+    
+    # - name: Run Tests
+    #   run: npm test
+    #   working-directory: ./backend

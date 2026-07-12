@@ -1,0 +1,12 @@
+express
+cors
+dotenv
+prisma
+@prisma/client
+bcrypt
+jsonwebtoken
+helmet
+express-rate-limit
+zod
+morgan
+nodemon
