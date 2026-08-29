@@ -1,15 +1,16 @@
 const prisma = require("../../config/prisma");
 
-/**
- * Owner: Member 2 (Public API Developer)
- */
-
-// TODO: return categories, optionally with product counts
 async function getAllCategories() {
-  // return prisma.categories.findMany();
-  throw new Error("Not implemented");
+  return prisma.categories.findMany({
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, description: true, created_at: true, _count: { select: { products: { where: { is_active: true } } } } },
+  });
 }
 
-module.exports = {
-  getAllCategories,
-};
+async function getCategoryById(id) {
+  const cat = await prisma.categories.findUnique({ where: { id }, include: { products: { where: { is_active: true }, take: 10, include: { product_images: true, product_variants: { take: 1 } } } } });
+  if (!cat) { const err = new Error("Category not found."); err.statusCode = 404; throw err; }
+  return cat;
+}
+
+module.exports = { getAllCategories, getCategoryById };

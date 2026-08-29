@@ -1,13 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-/**
- * Owner: Member 3 / Member 4 (wherever auth UI ends up living)
- * Wire this up once POST /public/auth/login actually returns a real token
- * (see backend/src/services/public/auth.service.js).
- */
-
-interface AuthUser {
+export interface AuthUser {
   id: string;
   first_name: string;
   last_name: string;
@@ -17,8 +11,10 @@ interface AuthUser {
 
 interface AuthState {
   accessToken: string | null;
+  refreshToken: string | null;
   user: AuthUser | null;
-  setAuth: (accessToken: string, user: AuthUser) => void;
+  setAuth: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  setAccessToken: (accessToken: string) => void;
   logout: () => void;
 }
 
@@ -26,9 +22,11 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       accessToken: null,
+      refreshToken: null,
       user: null,
-      setAuth: (accessToken, user) => set({ accessToken, user }),
-      logout: () => set({ accessToken: null, user: null }),
+      setAuth: (accessToken, refreshToken, user) => set({ accessToken, refreshToken, user }),
+      setAccessToken: (accessToken) => set({ accessToken }),
+      logout: () => set({ accessToken: null, refreshToken: null, user: null }),
     }),
     { name: "auth-storage" },
   ),

@@ -1,11 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../../controllers/public/auth.controller');
+const authController = require("../../controllers/public/auth.controller");
+const requireAuth = require("../../middleware/auth.middleware");
 
-// POST register user (Intern: Member 4 - Implement Logic in auth.service.js)
-router.post('/register', authController.register);
+// Public endpoints
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post("/refresh", authController.refresh);
+router.post("/logout", authController.logout);
 
-// POST login user (Intern: Member 4 - Implement Logic in auth.service.js)
-router.post('/login', authController.login);
+// Protected endpoint
+router.get("/me", requireAuth, authController.getProfile);
 
 module.exports = router;

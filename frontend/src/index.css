@@ -1,1 +1,419 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..900;1,14..32,300..900&display=swap');
+
+/* ─── Design Tokens ─────────────────────────────────────── */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* Brand palette */
+  --color-dominant:    #0B0F19;
+  --color-secondary:   #1F2937;
+  --color-card:        #131929;
+  --color-accent:      #6366F1;
+  --color-accent-dark: #4F46E5;
+
+  /* Text */
+  --color-text-primary:   #F8FAFC;
+  --color-text-secondary: #CBD5E1;
+  --color-text-muted:     #64748B;
+
+  /* Border */
+  --color-border-subtle: rgba(255,255,255,0.07);
+  --color-border-active: rgba(99,102,241,0.45);
+}
+
+/* ─── Base Reset ────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #0B0F19;
+  color: #F8FAFC;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #0B0F19; }
+::-webkit-scrollbar-thumb { background: #1F2937; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #6366F1; }
+
+/* ─── Glass / Blur Surfaces ─────────────────────────────── */
+.glass-nav {
+  background: rgba(11, 15, 25, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.glass-card {
+  background: rgba(19, 25, 41, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+}
+
+/* ─── Product Card ──────────────────────────────────────── */
+.product-card {
+  background: #131929;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+.product-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(99,102,241,0.35);
+  box-shadow: 0 24px 48px rgba(0,0,0,0.45);
+}
+.product-card:hover .product-card-img {
+  transform: scale(1.04);
+}
+.product-card-img {
+  transition: transform 0.5s ease;
+}
+
+/* ─── Buttons ───────────────────────────────────────────── */
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #6366F1;
+  color: #fff;
+  padding: 11px 26px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.22s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-accent:hover {
+  background: #4F46E5;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 30px rgba(99,102,241,0.38);
+}
+.btn-accent:active { transform: translateY(0); }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #F8FAFC;
+  padding: 11px 26px;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.18);
+  transition: all 0.22s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-outline:hover {
+  border-color: rgba(99,102,241,0.55);
+  background: rgba(99,102,241,0.1);
+  color: #F8FAFC;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: #CBD5E1;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.06); color: #F8FAFC; }
+
+/* ─── Inputs ─────────────────────────────────────────────── */
+.marb-input {
+  width: 100%;
+  background: rgba(31, 41, 55, 0.7);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 13px 16px;
+  color: #F8FAFC;
+  font-size: 14px;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.22s ease;
+  outline: none;
+}
+.marb-input::placeholder { color: #64748B; }
+.marb-input:focus {
+  border-color: #6366F1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+  background: rgba(31, 41, 55, 0.9);
+}
+
+/* ─── Badges ────────────────────────────────────────────── */
+.badge-new {
+  background: #6366F1;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+.badge-sale {
+  background: rgba(239,68,68,0.85);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+/* ─── Typography helpers ────────────────────────────────── */
+.section-label {
+  color: #6366F1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.hero-heading {
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  color: #F8FAFC;
+}
+
+.section-heading {
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #F8FAFC;
+}
+
+/* ─── Size / Color Selector chips ──────────────────────── */
+.size-chip {
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #CBD5E1;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.size-chip:hover, .size-chip.active {
+  border-color: #6366F1;
+  background: rgba(99,102,241,0.2);
+  color: #F8FAFC;
+}
+
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+.color-swatch.active, .color-swatch:hover {
+  border-color: #6366F1;
+  transform: scale(1.1);
+}
+
+/* ─── Divider ────────────────────────────────────────────── */
+.marb-divider {
+  border: none;
+  height: 1px;
+  background: rgba(255,255,255,0.07);
+}
+
+/* ─── Skeleton loader ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position: 800px 0;  }
+}
+.skeleton {
+  background: linear-gradient(90deg, #1a2234 25%, #222d44 50%, #1a2234 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ─── Keyframes ─────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1);    }
+}
+
+.anim-fade-in-up  { animation: fadeInUp 0.65s ease forwards; }
+.anim-fade-in     { animation: fadeIn 0.5s ease forwards; }
+.anim-slide-right { animation: slideInRight 0.55s ease forwards; }
+.anim-scale-in    { animation: scaleIn 0.45s ease forwards; }
+
+/* Stagger delays */
+.delay-100 { animation-delay: 0.1s; opacity: 0; }
+.delay-200 { animation-delay: 0.2s; opacity: 0; }
+.delay-300 { animation-delay: 0.3s; opacity: 0; }
+.delay-400 { animation-delay: 0.4s; opacity: 0; }
+.delay-500 { animation-delay: 0.5s; opacity: 0; }
+.delay-600 { animation-delay: 0.6s; opacity: 0; }
+
+/* ─── Mobile nav drawer ──────────────────────────────────── */
+.mobile-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+.mobile-drawer-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+}
+.mobile-drawer-panel {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 280px;
+  background: #0f1828;
+  border-left: 1px solid rgba(255,255,255,0.07);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ─── Hero image overlay ─────────────────────────────────── */
+.hero-overlay {
+  background: linear-gradient(
+    105deg,
+    rgba(11,15,25,0.92) 0%,
+    rgba(11,15,25,0.72) 50%,
+    rgba(11,15,25,0.25) 100%
+  );
+}
+
+/* ─── Footer ─────────────────────────────────────────────── */
+.footer-link {
+  color: #64748B;
+  font-size: 14px;
+  text-decoration: none;
+  transition: color 0.2s ease;
+  display: block;
+  margin-bottom: 10px;
+}
+.footer-link:hover { color: #F8FAFC; }
+
+/* ─── Tab / Filter pills ─────────────────────────────────── */
+.filter-tab {
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #64748B;
+  background: transparent;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+.filter-tab:hover { color: #F8FAFC; border-color: rgba(255,255,255,0.2); }
+.filter-tab.active {
+  background: #6366F1;
+  border-color: #6366F1;
+  color: #fff;
+}
+
+/* ─── Admin dashboard ───────────────────────────────────── */
+.stat-card {
+  background: #131929;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+.stat-card:hover {
+  border-color: rgba(99,102,241,0.3);
+}
+
+/* ─── Quantity stepper ──────────────────────────────────── */
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #F8FAFC;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.qty-btn:hover { background: rgba(99,102,241,0.25); border-color: #6366F1; }
+
+/* ─── Accent gradient text ──────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #6366F1, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Wishlist button ───────────────────────────────────── */
+.wishlist-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(11,15,25,0.8);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748B;
+  transition: all 0.2s ease;
+}
+.wishlist-btn:hover { background: rgba(99,102,241,0.2); color: #6366F1; border-color: #6366F1; }
+.wishlist-btn.liked  { background: rgba(99,102,241,0.2); color: #6366F1; border-color: #6366F1; }

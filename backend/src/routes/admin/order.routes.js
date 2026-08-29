@@ -1,10 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const orderController = require('../../controllers/admin/order.controller');
-const requireAuth = require('../../middleware/auth.middleware');
-const requireRole = require('../../middleware/role.middleware');
+const orderController = require("../../controllers/admin/order.controller");
 
-router.get('/', requireAuth, requireRole('ADMIN'), orderController.listOrders);
-router.patch('/:id/status', requireAuth, requireRole('ADMIN'), orderController.updateOrderStatus);
+router.get("/", orderController.listOrders);
+router.put("/:id/status", orderController.updateStatus);
 
 module.exports = router;

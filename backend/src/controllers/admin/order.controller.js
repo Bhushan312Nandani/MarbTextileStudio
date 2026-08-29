@@ -1,21 +1,39 @@
 const orderService = require("../../services/admin/order.service");
 
-/** Owner: Member 3 (Admin API Developer) */
-
 async function listOrders(req, res, next) {
   try {
-    res.status(200).json({ message: "Admin: Order List - To be implemented" });
+    const result = await orderService.getAllOrders(req.query);
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
   } catch (err) {
     next(err);
   }
 }
 
-async function updateOrderStatus(req, res, next) {
+async function updateStatus(req, res, next) {
   try {
-    res.status(200).json({ message: `Admin: Update Order ${req.params.id} status - To be implemented` });
+    const { status, trackingNumber, courierName } = req.body;
+    if (!status) {
+      return res.status(400).json({ message: "Status is required." });
+    }
+    const order = await orderService.updateOrderStatus(req.params.id, {
+      status,
+      trackingNumber,
+      courierName,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Order status updated successfully",
+      data: order,
+    });
   } catch (err) {
     next(err);
   }
 }
 
-module.exports = { listOrders, updateOrderStatus };
+module.exports = {
+  listOrders,
+  updateStatus,
+};

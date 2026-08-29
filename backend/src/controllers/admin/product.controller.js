@@ -1,11 +1,25 @@
 const productService = require("../../services/admin/product.service");
 
-/** Owner: Member 3 (Admin API Developer) */
+async function listProducts(req, res, next) {
+  try {
+    const result = await productService.getAllAdminProducts(req.query);
+    return res.status(200).json({
+      success: true,
+      ...result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
 
 async function createProduct(req, res, next) {
   try {
-    const product = await productService.createProduct(req.body);
-    return res.status(201).json({ data: product });
+    const product = await productService.createProduct(req.user.id, req.body);
+    return res.status(201).json({
+      success: true,
+      message: "Product created successfully",
+      data: product,
+    });
   } catch (err) {
     next(err);
   }
@@ -14,7 +28,11 @@ async function createProduct(req, res, next) {
 async function updateProduct(req, res, next) {
   try {
     const product = await productService.updateProduct(req.params.id, req.body);
-    return res.status(200).json({ data: product });
+    return res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      data: product,
+    });
   } catch (err) {
     next(err);
   }
@@ -22,11 +40,20 @@ async function updateProduct(req, res, next) {
 
 async function deleteProduct(req, res, next) {
   try {
-    await productService.deleteProduct(req.params.id);
-    return res.status(204).send();
+    const product = await productService.deleteProduct(req.params.id);
+    return res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      data: product,
+    });
   } catch (err) {
     next(err);
   }
 }
 
-module.exports = { createProduct, updateProduct, deleteProduct };
+module.exports = {
+  listProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+};

@@ -1,19 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// Placeholders for the interns to implement their specific routes
-const productRoutes = require('./public/product.routes');
-const categoryRoutes = require('./public/category.routes');
-const authRoutes = require('./public/auth.routes');
-const adminRoutes = require('./admin/index');
+const productRoutes = require("./public/product.routes");
+const categoryRoutes = require("./public/category.routes");
+const authRoutes = require("./public/auth.routes");
+const cartRoutes = require("./public/cart.routes");
+const orderRoutes = require("./public/order.routes");
+const wishlistRoutes = require("./public/wishlist.routes");
+const reviewRoutes = require("./public/review.routes");
 
-// Connect the public routes
-router.use('/public/products', productRoutes);
-router.use('/public/categories', categoryRoutes);
-router.use('/public/auth', authRoutes);
+const adminRoutes = require("./admin/index");
 
-// Connect the admin routes (all protected by auth + role middleware)
-router.use('/admin', adminRoutes);
+// Public and Customer Routes
+router.use("/public/auth", authRoutes);
+router.use("/public/products", productRoutes);
+router.use("/public/categories", categoryRoutes);
+router.use("/public/cart", cartRoutes);
+router.use("/public/orders", orderRoutes);
+router.use("/public/wishlist", wishlistRoutes);
+router.use("/public/reviews", reviewRoutes);
 
-// Export the main router
+// Admin Routes
+router.use("/admin", adminRoutes);
+
 module.exports = router;
