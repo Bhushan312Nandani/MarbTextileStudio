@@ -61,28 +61,16 @@ export default function Checkout() {
     };
 
     try {
-      if (user) {
-        // Logged in user: execute API order to PostgreSQL database
-        const res = await createOrder(orderPayload);
-        const orderId = res?.id || `ORD-${Date.now().toString().slice(-6)}`;
-        setOrderComplete({
-          orderId,
-          total,
-          itemsCount: lines.reduce((n, l) => n + l.quantity, 0),
-          email: shippingForm.email,
-          city: shippingForm.city,
-        });
-      } else {
-        // Guest checkout flow
-        const orderId = `ORD-GST-${Date.now().toString().slice(-6)}`;
-        setOrderComplete({
-          orderId,
-          total,
-          itemsCount: lines.reduce((n, l) => n + l.quantity, 0),
-          email: shippingForm.email,
-          city: shippingForm.city,
-        });
-      }
+      // Execute live API order to PostgreSQL database (for both logged-in and guest customers)
+      const res = await createOrder(orderPayload);
+      const orderId = res?.id || `ORD-${Date.now().toString().slice(-6)}`;
+      setOrderComplete({
+        orderId,
+        total,
+        itemsCount: lines.reduce((n, l) => n + l.quantity, 0),
+        email: shippingForm.email,
+        city: shippingForm.city,
+      });
 
       clear();
       showToast("Order Confirmed!", "Your apparel order has been recorded in the live database.", "success");

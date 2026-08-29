@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 const orderController = require("../../controllers/public/order.controller");
 const requireAuth = require("../../middleware/auth.middleware");
+const optionalAuth = require("../../middleware/optionalAuth.middleware");
 
-// All order routes require authentication
-router.use(requireAuth);
+// Allow both guest and logged-in customers to place orders
+router.post("/", optionalAuth, orderController.createOrder);
 
-router.post("/", orderController.createOrder);
-router.get("/", orderController.listOrders);
-router.get("/:id", orderController.getOrder);
+// Account-specific order listing requires auth
+router.get("/", requireAuth, orderController.listOrders);
+router.get("/:id", optionalAuth, orderController.getOrder);
 
 module.exports = router;

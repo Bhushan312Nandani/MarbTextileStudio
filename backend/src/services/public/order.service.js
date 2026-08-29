@@ -3,13 +3,35 @@ const prisma = require("../../config/prisma");
 /** Owner: Member 3 — Order placement and management */
 
 async function placeOrder(userId, { shippingAddressId, couponId, items, shippingDetails } = {}) {
+  // Ensure we have a user account (auto-register guest with their provided email & name)
+  let finalUserId = userId;
+  if (!finalUserId) {
+    const guestEmail = shippingDetails?.email?.trim() || `guest_${Date.now()}@marbstudio.com`;
+    const firstName  = shippingDetails?.firstName?.trim() || "Guest";
+    const lastName   = shippingDetails?.lastName?.trim() || "Client";
+
+    let existingUser = await prisma.users.findUnique({ where: { email: guestEmail } });
+    if (!existingUser) {
+      existingUser = await prisma.users.create({
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          email: guestEmail,
+          password_hash: "GUEST_ORDER_ACCOUNT",
+          role: "CUSTOMER",
+        },
+      });
+    }
+    finalUserId = existingUser.id;
+  }
+
   // If shippingDetails provided and no addressId, save address
   let finalAddressId = shippingAddressId;
   if (!finalAddressId && shippingDetails) {
     try {
       const addr = await prisma.addresses.create({
         data: {
-          user_id: userId,
+          user_id: finalUserId,
           address_line1: shippingDetails.address || "Street Address",
           city: shippingDetails.city || "Lahore",
           state: shippingDetails.province || "Punjab",
@@ -97,7 +119,7 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
   const order = await prisma.$transaction(async (tx) => {
     const newOrder = await tx.orders.create({
       data: {
-        user_id:             userId,
+        user_id:             finalUserId,
         shipping_address_id: finalAddressId || null,
         coupon_id:           validCouponId,
         subtotal,
@@ -123,7 +145,7 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
     }
 
     // Clear the cart if user has one
-    const userCart = await tx.carts.findUnique({ where: { user_id: userId } });
+    const userCart = await tx.carts.findUnique({ where: { user_id: finalUserId } });
     if (userCart) {
       await tx.cart_items.deleteMany({ where: { cart_id: userCart.id } });
     }
@@ -141,7 +163,7 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
     return newOrder;
   });
 
-  return getOrderById(userId, order.id);
+  return getOrderById(finalUserId, order.id);
 }
 
 async function getUserOrders(userId) {
