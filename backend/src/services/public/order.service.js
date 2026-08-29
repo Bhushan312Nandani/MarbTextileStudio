@@ -75,9 +75,10 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
   let discountPercent = 0;
   let validCouponId   = null;
   if (couponId) {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(couponId);
     const coupon = await prisma.coupons.findFirst({
       where: {
-        OR: [{ id: couponId }, { code: couponId }],
+        ...(isUuid ? { OR: [{ id: couponId }, { code: couponId }] } : { code: couponId }),
         is_active: true,
       },
     });
