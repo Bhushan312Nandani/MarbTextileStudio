@@ -7,10 +7,17 @@ const rateLimit = require("express-rate-limit");
 
 const app = express();
 
+// Disable x-powered-by to prevent tech stack fingerprinting
+app.disable("x-powered-by");
+
+// Trust proxy for accurate client IP identification in rate-limiting (AWS / Vercel / Nginx)
+app.set("trust proxy", 1);
+
 // ── Security headers ────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
   contentSecurityPolicy: false, // handled separately per env if needed
+  hidePoweredBy: true,
 }));
 
 // ── CORS ────────────────────────────────────────────────────────────────────
