@@ -35,12 +35,12 @@ export async function getAdminStats(): Promise<AdminStats> {
 
 export async function getAdminProducts(params?: { page?: number; limit?: number; search?: string }) {
   const { data } = await apiClient.get("/admin/products", { params });
-  return data?.data ?? data;
+  return data;
 }
 
 export async function getAdminOrders(params?: { page?: number; limit?: number; status?: string }) {
   const { data } = await apiClient.get("/admin/orders", { params });
-  return data?.data ?? data;
+  return data;
 }
 
 export async function updateOrderStatus(orderId: string, status: string, trackingNumber?: string) {
