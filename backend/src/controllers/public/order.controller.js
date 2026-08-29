@@ -2,7 +2,8 @@ const orderService = require("../../services/public/order.service");
 
 async function createOrder(req, res, next) {
   try {
-    const order = await orderService.placeOrder(req.user.id, req.body);
+    const userId = req.user ? req.user.id : null;
+    const order = await orderService.placeOrder(userId, req.body);
     return res.status(201).json({
       success: true,
       message: "Order placed successfully",
