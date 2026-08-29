@@ -112,7 +112,7 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
     });
 
     // Deduct stock for each variant
-    for (const item of cart.cart_items) {
+    for (const item of orderItemsData) {
       await tx.product_variants.update({
         where: { id: item.variant_id },
         data:  { stock_quantity: { decrement: item.quantity } },
@@ -122,8 +122,11 @@ async function placeOrder(userId, { shippingAddressId, couponId, items, shipping
       });
     }
 
-    // Clear the cart
-    await tx.cart_items.deleteMany({ where: { cart_id: cart.id } });
+    // Clear the cart if user has one
+    const userCart = await tx.carts.findUnique({ where: { user_id: userId } });
+    if (userCart) {
+      await tx.cart_items.deleteMany({ where: { cart_id: userCart.id } });
+    }
 
     // Create a pending payment record
     await tx.payments.create({
