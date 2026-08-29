@@ -14,14 +14,21 @@ app.use(helmet({
 }));
 
 // ── CORS ────────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173,http://localhost:3000")
   .split(",")
   .map((o) => o.trim());
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (curl, Postman, server-to-server)
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+    if (!origin) return callback(null, true);
+    // If CORS_ORIGIN is wildcard '*' or explicitly listed
+    if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) return callback(null, true);
+    // Allow all vercel deployment URLs (*.vercel.app)
+    if (origin.endsWith(".vercel.app") || origin.includes("vercel.app")) return callback(null, true);
+    // Allow localhost during development
+    if (origin.startsWith("http://localhost:") || origin.startsWith("http://127.0.0.1:")) return callback(null, true);
+    
     callback(new Error(`CORS: origin ${origin} not allowed`));
   },
   credentials: true,

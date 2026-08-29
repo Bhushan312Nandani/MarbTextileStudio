@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: marb-textile-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install && npx prisma generate
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: marb-textile-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
+
+databases:
+  - name: marb-textile-db
+    plan: free
+    databaseName: apparel_ecommerce_db
+    user: apparel_user
