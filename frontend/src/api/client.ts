@@ -3,7 +3,12 @@ import { useAuthStore } from "../store/useAuthStore";
 
 const getBaseUrl = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL;
-  if (!envUrl) return "http://localhost:5000/api/v1";
+  if (!envUrl) {
+    if (typeof window !== "undefined" && window.location.hostname.includes("vercel.app")) {
+      return "/api/v1";
+    }
+    return "http://localhost:5000/api/v1";
+  }
   const clean = envUrl.replace(/\/+$/, "");
   return clean.endsWith("/api/v1") ? clean : `${clean}/api/v1`;
 };
