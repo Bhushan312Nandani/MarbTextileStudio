@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Prisma setup
+COPY prisma ./prisma
+RUN npx prisma generate
+
+# Copy application source code
+COPY . .
+
+EXPOSE 5000
+
+ENV PORT=5000
+ENV NODE_ENV=production
+
+CMD ["npm", "start"]
