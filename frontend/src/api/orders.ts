@@ -33,6 +33,15 @@ export interface Order {
 export async function createOrder(payload: {
   shippingAddressId?: string;
   couponId?: string;
+  items?: Array<{
+    variantId?: string;
+    productId?: string;
+    size?: string;
+    color?: string;
+    quantity: number;
+    price?: number;
+  }>;
+  shippingDetails?: any;
 }): Promise<Order> {
   const { data } = await apiClient.post<{ success: boolean; data: Order }>(
     "/public/orders",

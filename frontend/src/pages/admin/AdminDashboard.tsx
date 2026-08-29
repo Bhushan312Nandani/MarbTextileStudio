@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { getAdminStats, getAdminProducts, getAdminOrders, updateOrderStatus, type AdminStats } from "../../api/admin";
 import { apiClient } from "../../api/client";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -35,33 +36,16 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-const INITIAL_ORDERS = [
-  { id: "ORD-948201", users: { first_name: "Ali", last_name: "Khan" }, grand_total: 25800, status: "DELIVERED" },
-  { id: "ORD-948202", users: { first_name: "Sara", last_name: "Ahmed" }, grand_total: 18900, status: "SHIPPED" },
-  { id: "ORD-948203", users: { first_name: "Usman", last_name: "Raza" }, grand_total: 7900, status: "PROCESSING" },
-  { id: "ORD-948204", users: { first_name: "Fatima", last_name: "Malik" }, grand_total: 33800, status: "PENDING" },
-];
-
-const INITIAL_PRODUCTS = [
-  { id: "1", title: "Abstract Hood", categories: { name: "Hoodies" }, product_variants: [{ stock_quantity: 42, price: 12900 }], is_active: true },
-  { id: "2", title: "Form Tee", categories: { name: "Tees" }, product_variants: [{ stock_quantity: 120, price: 7900 }], is_active: true },
-  { id: "3", title: "Motion Jacket", categories: { name: "Jackets" }, product_variants: [{ stock_quantity: 18, price: 18900 }], is_active: true },
-  { id: "4", title: "Studio Cap", categories: { name: "Accessories" }, product_variants: [{ stock_quantity: 55, price: 4900 }], is_active: true },
-  { id: "5", title: "Motion Pant", categories: { name: "Bottoms" }, product_variants: [{ stock_quantity: 22, price: 14900 }], is_active: true },
-  { id: "6", title: "Signature Hood", categories: { name: "Hoodies" }, product_variants: [{ stock_quantity: 8, price: 15900 }], is_active: true },
-  { id: "7", title: "Studio Essentials Set", categories: { name: "Bundles" }, product_variants: [{ stock_quantity: 15, price: 22900 }], is_active: true },
-  { id: "8", title: "Limited Edition Tee", categories: { name: "Tees" }, product_variants: [{ stock_quantity: 10, price: 11900 }], is_active: true },
-];
-
 export default function AdminDashboard() {
   const user = useAuthStore((s) => s.user);
   const showToast = useToastStore((s) => s.showToast);
 
   const [stats, setStats] = useState<AdminStats | null>(null);
-  const [products, setProducts] = useState<any[]>(INITIAL_PRODUCTS);
-  const [orders, setOrders] = useState<any[]>(INITIAL_ORDERS);
+  const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
   const [orderFilter, setOrderFilter] = useState("ALL");
   const [productSearch, setProductSearch] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // Product Creation Modal
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -77,36 +61,99 @@ export default function AdminDashboard() {
   const [creatingProd, setCreatingProd] = useState(false);
 
   useEffect(() => {
-    loadData();
+    if (user && user.role === "ADMIN") {
+      loadData();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
-  function loadData() {
-    Promise.all([
-      getAdminStats().catch(() => null),
-      getAdminProducts().catch(() => null),
-      getAdminOrders().catch(() => null),
-    ]).then(([statsRes, prodRes, orderRes]) => {
+  async function loadData() {
+    setLoading(true);
+    try {
+      const [statsRes, prodRes, orderRes] = await Promise.all([
+        getAdminStats().catch((err) => {
+          console.error("Admin stats fetch error:", err);
+          return null;
+        }),
+        getAdminProducts().catch((err) => {
+          console.error("Admin products fetch error:", err);
+          return null;
+        }),
+        getAdminOrders().catch((err) => {
+          console.error("Admin orders fetch error:", err);
+          return null;
+        }),
+      ]);
+
       if (statsRes) setStats(statsRes);
-      if (prodRes?.products) setProducts(prodRes.products);
-      if (orderRes?.orders) setOrders(orderRes.orders);
-    });
+      if (prodRes) {
+        const prodList = prodRes.products || (Array.isArray(prodRes) ? prodRes : []);
+        setProducts(prodList);
+      }
+      if (orderRes) {
+        const orderList = orderRes.orders || (Array.isArray(orderRes) ? orderRes : []);
+        setOrders(orderList);
+      }
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function handleStatusChange(orderId: string, newStatus: string) {
     try {
       await updateOrderStatus(orderId, newStatus);
-      // Reactive instant state update (no reload)
+      // Reactive instant state update in real-time
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
       );
       showToast("Order Status Updated", `Order #${orderId.slice(0, 8)} set to ${newStatus}`, "success");
     } catch {
-      // Mock fallback update
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-      );
-      showToast("Status Updated", `Order set to ${newStatus}`, "success");
+      showToast("Update Failed", "Could not update order status in live database.", "error");
     }
+  }
+
+  // ── Authentication Gate (Protected Route) ──
+  if (!user || user.role !== "ADMIN") {
+    return (
+      <div style={{ backgroundColor: "#0B0F19", minHeight: "85vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "40px 24px" }}>
+        <div className="glass-card anim-scale-in" style={{ maxWidth: "480px", width: "100%", padding: "48px 36px", textAlign: "center" }}>
+          <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
+            <span style={{ fontSize: "24px" }}>🔒</span>
+          </div>
+          <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#F8FAFC", marginBottom: "8px" }}>
+            Admin Access Required
+          </h2>
+          <p style={{ fontSize: "14px", color: "#94A3B8", lineHeight: 1.6, marginBottom: "28px" }}>
+            The Marb Studio Atelier Control Center is protected. You must be signed in with an active <strong className="text-indigo-300">Administrator</strong> account to view live revenue, inventory, and fulfillment orders.
+          </p>
+
+          <Link
+            to="/login?redirect=/admin"
+            className="btn-accent"
+            style={{ width: "100%", justifyContent: "center", padding: "12px 24px", fontSize: "14px", textDecoration: "none", display: "inline-flex" }}
+          >
+            Sign In with Admin Credentials
+          </Link>
+          <div style={{ marginTop: "16px", padding: "12px", background: "rgba(255,255,255,0.03)", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <p style={{ fontSize: "11px", color: "#64748B" }}>
+              Administrator Account: <strong style={{ color: "#E2E8F0" }}>admin@marbtextile.test</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading && !stats) {
+    return (
+      <div style={{ backgroundColor: "#0B0F19", minHeight: "85vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: "36px", height: "36px", border: "3px solid rgba(255,255,255,0.1)", borderTopColor: "#6366F1", borderRadius: "50%", margin: "0 auto 16px", animation: "spin 0.8s linear infinite" }} />
+          <p style={{ color: "#94A3B8", fontSize: "14px", fontWeight: 600 }}>Connecting to Live PostgreSQL & Operations Center...</p>
+        </div>
+      </div>
+    );
   }
 
   async function handleCreateProduct(e: React.FormEvent) {
@@ -314,41 +361,49 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.map((o) => (
-                  <tr
-                    key={o.id}
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
-                  >
-                    <td style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#818CF8", fontFamily: "monospace" }}>
-                      #{o.id.slice(0, 8)}
-                    </td>
-                    <td style={{ padding: "14px 16px", fontSize: "14px", color: "#F8FAFC" }}>
-                      {o.users?.first_name || "Direct Client"} {o.users?.last_name || ""}
-                    </td>
-                    <td style={{ padding: "14px 16px", fontSize: "14px", fontWeight: 700, color: "#F8FAFC" }}>
-                      Rs {parseFloat(o.grand_total || 0).toLocaleString()}
-                    </td>
-                    <td style={{ padding: "14px 16px" }}>
-                      <StatusBadge status={o.status} />
-                    </td>
-                    <td style={{ padding: "14px 16px" }}>
-                      <select
-                        value={o.status}
-                        onChange={(e) => handleStatusChange(o.id, e.target.value)}
-                        className="marb-input"
-                        style={{ padding: "6px 10px", fontSize: "12px", width: "auto", cursor: "pointer" }}
-                      >
-                        <option value="PENDING">PENDING</option>
-                        <option value="PROCESSING">PROCESSING</option>
-                        <option value="SHIPPED">SHIPPED</option>
-                        <option value="DELIVERED">DELIVERED</option>
-                        <option value="CANCELLED">CANCELLED</option>
-                      </select>
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: "center", padding: "40px 16px", color: "#64748B", fontSize: "13px" }}>
+                      No client orders currently recorded under <strong>"{orderFilter}"</strong> status in the live database.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  filteredOrders.map((o) => (
+                    <tr
+                      key={o.id}
+                      style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(255,255,255,0.02)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <td style={{ padding: "14px 16px", fontSize: "13px", fontWeight: 600, color: "#818CF8", fontFamily: "monospace" }}>
+                        #{o.id.slice(0, 8)}
+                      </td>
+                      <td style={{ padding: "14px 16px", fontSize: "14px", color: "#F8FAFC" }}>
+                        {o.users?.first_name || "Direct Client"} {o.users?.last_name || ""}
+                      </td>
+                      <td style={{ padding: "14px 16px", fontSize: "14px", fontWeight: 700, color: "#F8FAFC" }}>
+                        Rs {parseFloat(o.grand_total || 0).toLocaleString()}
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <StatusBadge status={o.status} />
+                      </td>
+                      <td style={{ padding: "14px 16px" }}>
+                        <select
+                          value={o.status}
+                          onChange={(e) => handleStatusChange(o.id, e.target.value)}
+                          className="marb-input"
+                          style={{ padding: "6px 10px", fontSize: "12px", width: "auto", cursor: "pointer" }}
+                        >
+                          <option value="PENDING">PENDING</option>
+                          <option value="PROCESSING">PROCESSING</option>
+                          <option value="SHIPPED">SHIPPED</option>
+                          <option value="DELIVERED">DELIVERED</option>
+                          <option value="CANCELLED">CANCELLED</option>
+                        </select>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
